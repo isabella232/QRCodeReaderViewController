@@ -208,8 +208,10 @@
 
 - (void)viewDidLayoutSubviews {
   [super viewDidLayoutSubviews];
-  
-  [self.cameraMaskedOverlayView setNeedsDisplay];
+
+  [_cameraView setNeedsDisplay];
+  [_cameraMaskedOverlayView setNeedsDisplay];
+  [_cameraOverlayRectView setNeedsDisplay];
 }
 
 #pragma mark - Controlling the Reader
@@ -227,6 +229,8 @@
 - (void)orientationChanged:(NSNotification *)notification
 {
   [_cameraView setNeedsDisplay];
+  [_cameraMaskedOverlayView setNeedsDisplay];
+  [_cameraOverlayRectView setNeedsDisplay];
 
   if (_codeReader.previewLayer.connection.isVideoOrientationSupported) {
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
