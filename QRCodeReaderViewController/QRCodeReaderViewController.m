@@ -28,11 +28,15 @@
 #import "QRCameraSwitchButton.h"
 #import "QRCodeReaderView.h"
 #import "QRToggleTorchButton.h"
+#import "CameraMaskedOverlayView.h"
+#import "CameraOverlayRectView.h"
+#import "VerticalButton.h"
 
 @interface QRCodeReaderViewController ()
-@property (strong, nonatomic) QRCameraSwitchButton *switchCameraButton;
-@property (strong, nonatomic) QRToggleTorchButton *toggleTorchButton;
-@property (strong, nonatomic) UIButton *chooseFromPhotoLibraryButton;
+@property (strong, nonatomic) UILabel              *titleLabel;
+@property (strong, nonatomic) VerticalButton       *switchCameraButton;
+@property (strong, nonatomic) VerticalButton       *toggleTorchButton;
+@property (strong, nonatomic) VerticalButton       *chooseFromPhotoLibraryButton;
 @property (strong, nonatomic) QRCodeReaderView     *cameraView;
 @property (strong, nonatomic) UIButton             *cancelButton;
 @property (strong, nonatomic) QRCodeReader         *codeReader;
@@ -40,7 +44,15 @@
 @property (assign, nonatomic) BOOL                 showSwitchCameraButton;
 @property (assign, nonatomic) BOOL                 showTorchButton;
 @property (assign, nonatomic) BOOL                 showChooseFromPhotoLibraryButton;
-@property (strong, nonatomic) NSString                 *chooseFromPhotoLibraryButtonTitle;
+@property (strong, nonatomic) NSString             *chooseFromPhotoLibraryButtonTitle;
+@property (strong, nonatomic) CameraMaskedOverlayView          *cameraMaskedOverlayView;
+@property (strong, nonatomic) CameraOverlayRectView      *cameraOverlayRectView;
+@property (strong, nonatomic) UIStackView          *controlsStackView;
+@property (strong, nonatomic) UIColor              *bordersColor;
+@property (strong, nonatomic) NSString             *message;
+@property (strong, nonatomic) NSString             *torchTitle;
+@property (strong, nonatomic) UIImage              *chooseFromPhotoLibraryButtonImage;
+@property (strong, nonatomic) UIImage              *torchImage;
 
 @property (copy, nonatomic) void (^completionBlock) (NSString * __nullable);
 
@@ -68,7 +80,7 @@
 - (id)initWithCancelButtonTitle:(NSString *)cancelTitle chooseFromPhotoLibraryButtonTitle:(NSString*)chooseFromPhotoLibraryButtonTitle
 {
   QRCodeReader *reader = [QRCodeReader readerWithMetadataObjectTypes:@[AVMetadataObjectTypeQRCode]];
-  return [self initWithCancelButtonTitle:cancelTitle codeReader:reader startScanningAtLoad:YES showSwitchCameraButton:NO showTorchButton:NO chooseFromPhotoLibraryButtonTitle:chooseFromPhotoLibraryButtonTitle];
+  return [self initWithCancelButtonTitle:cancelTitle codeReader:reader startScanningAtLoad:YES showSwitchCameraButton:NO showTorchButton:NO chooseFromPhotoLibraryButtonTitle:chooseFromPhotoLibraryButtonTitle bordersColor: UIColor.lightGrayColor messageText: nil torchTitle:nil torchImage:nil chooseFromPhotoLibraryButtonImage:nil];
 }
 
 - (id)initWithMetadataObjectTypes:(NSArray *)metadataObjectTypes
@@ -95,23 +107,24 @@
 
 - (id)initWithCancelButtonTitle:(nullable NSString *)cancelTitle codeReader:(nonnull QRCodeReader *)codeReader startScanningAtLoad:(BOOL)startScanningAtLoad showSwitchCameraButton:(BOOL)showSwitchCameraButton showTorchButton:(BOOL)showTorchButton
 {
-  return [self initWithCancelButtonTitle:cancelTitle codeReader:codeReader startScanningAtLoad:startScanningAtLoad showSwitchCameraButton:YES showTorchButton:NO chooseFromPhotoLibraryButtonTitle:nil];
+  return [self initWithCancelButtonTitle:cancelTitle codeReader:codeReader startScanningAtLoad:startScanningAtLoad showSwitchCameraButton:YES showTorchButton:NO chooseFromPhotoLibraryButtonTitle:nil bordersColor:UIColor.lightGrayColor messageText: nil torchTitle:nil torchImage:nil chooseFromPhotoLibraryButtonImage:nil];
 }
 
-- (id)initWithCancelButtonTitle:(nullable NSString *)cancelTitle codeReader:(nonnull QRCodeReader *)codeReader startScanningAtLoad:(BOOL)startScanningAtLoad showSwitchCameraButton:(BOOL)showSwitchCameraButton showTorchButton:(BOOL)showTorchButton chooseFromPhotoLibraryButtonTitle:(NSString*)chooseFromPhotoLibraryButtonTitle
+- (nonnull id)initWithCancelButtonTitle:(nullable NSString *)cancelTitle codeReader:(nonnull QRCodeReader *)codeReader startScanningAtLoad:(BOOL)startScanningAtLoad showSwitchCameraButton:(BOOL)showSwitchCameraButton showTorchButton:(BOOL)showTorchButton chooseFromPhotoLibraryButtonTitle:(nullable NSString*)chooseFromPhotoLibraryButtonTitle bordersColor: (nullable UIColor*) bordersColor messageText: (nullable NSString *)message torchTitle: (nullable NSString*)torchTitle torchImage: (nullable UIImage*) torchImage chooseFromPhotoLibraryButtonImage: (nullable UIImage*) chooseFromPhotoLibraryButtonImage
 {
   if ((self = [super init])) {
     self.view.backgroundColor   = [UIColor blackColor];
+    self.bordersColor           = bordersColor;
     self.codeReader             = codeReader;
     self.startScanningAtLoad    = startScanningAtLoad;
     self.showSwitchCameraButton = showSwitchCameraButton;
     self.showTorchButton        = showTorchButton;
     self.showChooseFromPhotoLibraryButton = chooseFromPhotoLibraryButtonTitle != nil;
     self.chooseFromPhotoLibraryButtonTitle = chooseFromPhotoLibraryButtonTitle;
-
-    if (cancelTitle == nil) {
-      cancelTitle = NSLocalizedString(@"Cancel", @"Cancel");
-    }
+    self.message = message;
+    self.torchImage = torchImage;
+    self.torchTitle = torchTitle;
+    self.chooseFromPhotoLibraryButtonImage = chooseFromPhotoLibraryButtonImage;
 
     [self setupUIComponentsWithCancelButtonTitle:cancelTitle];
     [self setupAutoLayoutConstraints];
@@ -193,6 +206,12 @@
   return YES;
 }
 
+- (void)viewDidLayoutSubviews {
+  [super viewDidLayoutSubviews];
+  
+  [self.cameraMaskedOverlayView setNeedsDisplay];
+}
+
 #pragma mark - Controlling the Reader
 
 - (void)startScanning {
@@ -231,8 +250,29 @@
   self.cameraView                                       = [[QRCodeReaderView alloc] init];
   _cameraView.translatesAutoresizingMaskIntoConstraints = NO;
   _cameraView.clipsToBounds                             = YES;
+    
+  self.cameraMaskedOverlayView = [[CameraMaskedOverlayView alloc] init];
+  
+  _cameraMaskedOverlayView.translatesAutoresizingMaskIntoConstraints = NO;
+  _cameraMaskedOverlayView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.7];
+  
+  self.cameraOverlayRectView = [[CameraOverlayRectView alloc] init];
+  _cameraOverlayRectView.translatesAutoresizingMaskIntoConstraints = NO;
+  _cameraOverlayRectView.backgroundColor = UIColor.clearColor;
+  _cameraOverlayRectView.tintColor = self.bordersColor;
+  _cameraOverlayRectView.lineLength = 50.0f;
+  _cameraOverlayRectView.lineWidth = 3.0f;
+  
   [self.view addSubview:_cameraView];
+  [self.view addSubview:_cameraMaskedOverlayView];
+  [self.view addSubview:_cameraOverlayRectView];
 
+  self.controlsStackView = [[UIStackView alloc] init];
+  _controlsStackView.axis = UILayoutConstraintAxisHorizontal;
+  _controlsStackView.translatesAutoresizingMaskIntoConstraints = NO;
+  _controlsStackView.distribution = UIStackViewDistributionFillEqually;
+  _controlsStackView.spacing = 20;
+    
   [_codeReader.previewLayer setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
 
   if ([_codeReader.previewLayer.connection isVideoOrientationSupported]) {
@@ -242,36 +282,49 @@
   }
 
   if (_showSwitchCameraButton && [_codeReader hasFrontDevice]) {
-    _switchCameraButton = [[QRCameraSwitchButton alloc] init];
-    
+    _switchCameraButton = [[VerticalButton alloc] initWithTitle:NSLocalizedString(@"Switch", @"Switch") image:nil];
+
     [_switchCameraButton setTranslatesAutoresizingMaskIntoConstraints:false];
     [_switchCameraButton addTarget:self action:@selector(switchCameraAction:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_switchCameraButton];
+    [_controlsStackView addArrangedSubview:_switchCameraButton];
   }
 
   if (_showTorchButton && [_codeReader isTorchAvailable]) {
-    _toggleTorchButton = [[QRToggleTorchButton alloc] init];
-
+    _toggleTorchButton = [[VerticalButton alloc] initWithTitle: self.torchTitle image: self.torchImage];
+    
     [_toggleTorchButton setTranslatesAutoresizingMaskIntoConstraints:false];
     [_toggleTorchButton addTarget:self action:@selector(toggleTorchAction:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_toggleTorchButton];
+    [_controlsStackView addArrangedSubview:_toggleTorchButton];
   }
-
+  
+  if(_message) {
+    self.titleLabel = [[UILabel alloc] init];
+    _titleLabel.translatesAutoresizingMaskIntoConstraints = false;
+    _titleLabel.text = _message;
+    _titleLabel.textAlignment = NSTextAlignmentCenter;
+    _titleLabel.textColor = UIColor.whiteColor;
+      
+    [self.view addSubview:_titleLabel];
+  }
   if (_showChooseFromPhotoLibraryButton) {
-    _chooseFromPhotoLibraryButton = [[UIButton alloc] init];
-
-    [_chooseFromPhotoLibraryButton setTitle:_chooseFromPhotoLibraryButtonTitle forState:UIControlStateNormal];
+    _chooseFromPhotoLibraryButton = [[VerticalButton alloc] initWithTitle:_chooseFromPhotoLibraryButtonTitle image:_chooseFromPhotoLibraryButtonImage];
+    
     [_chooseFromPhotoLibraryButton setTranslatesAutoresizingMaskIntoConstraints:false];
     [_chooseFromPhotoLibraryButton addTarget:self action:@selector(chooseFromPhotoLibrary:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_chooseFromPhotoLibraryButton];
+    [_controlsStackView addArrangedSubview:_chooseFromPhotoLibraryButton];
   }
 
-  self.cancelButton                                       = [[UIButton alloc] init];
-  _cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
-  [_cancelButton setTitle:cancelButtonTitle forState:UIControlStateNormal];
-  [_cancelButton setTitleColor:[UIColor grayColor] forState:UIControlStateHighlighted];
-  [_cancelButton addTarget:self action:@selector(cancelAction:) forControlEvents:UIControlEventTouchUpInside];
-  [self.view addSubview:_cancelButton];
+  if (cancelButtonTitle) {
+    self.cancelButton                                       = [[UIButton alloc] init];
+    
+    _cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [_cancelButton setTitle:cancelButtonTitle forState:UIControlStateNormal];
+    [_cancelButton setTitleColor:[UIColor grayColor] forState:UIControlStateHighlighted];
+    [_cancelButton addTarget:self action:@selector(cancelAction:) forControlEvents:UIControlEventTouchUpInside];
+    [_controlsStackView addArrangedSubview:_cancelButton];
+  }
+  
+  [self.view addSubview:_controlsStackView];
 }
 
 - (void)setupAutoLayoutConstraints
@@ -291,42 +344,38 @@
       leftLayoutAnchor = self.view.leftAnchor;
       rightLayoutAnchor = self.view.rightAnchor;
     }
-    
-  NSDictionary *views = NSDictionaryOfVariableBindings(_cameraView, _cancelButton);
+
+  NSDictionary *views = NSDictionaryOfVariableBindings(_cameraView);
 
   [self.view addConstraints:
-   [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_cameraView][_cancelButton(40)]" options:0 metrics:nil views:views]];
-  [[bottomLayoutAnchor constraintEqualToAnchor:_cancelButton.bottomAnchor] setActive:YES];
+   [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_cameraView]|" options:0 metrics:nil views:views]];
+  
   [self.view addConstraints:
    [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_cameraView]|" options:0 metrics:nil views:views]];
-  [self.view addConstraints:
-   [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[_cancelButton]-|" options:0 metrics:nil views:views]];
   
-  if (_switchCameraButton) {
-      [NSLayoutConstraint activateConstraints:@[
-          [topLayoutAnchor constraintEqualToAnchor:_switchCameraButton.topAnchor],
-          [rightLayoutAnchor constraintEqualToAnchor:_switchCameraButton.rightAnchor],
-          [_switchCameraButton.heightAnchor constraintEqualToConstant:50],
-          [_switchCameraButton.widthAnchor constraintEqualToConstant:70]
-          ]];
+  if (_titleLabel) {
+    [NSLayoutConstraint activateConstraints:@[
+      [_titleLabel.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+      [_titleLabel.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+      [_titleLabel.topAnchor constraintEqualToAnchor:topLayoutAnchor constant: 60],
+    ]];
   }
-
-  if (_toggleTorchButton) {
-      [NSLayoutConstraint activateConstraints:@[
-          [topLayoutAnchor constraintEqualToAnchor:_toggleTorchButton.topAnchor],
-          [leftLayoutAnchor constraintEqualToAnchor:_toggleTorchButton.leftAnchor],
-          [_toggleTorchButton.heightAnchor constraintEqualToConstant:50],
-          [_toggleTorchButton.widthAnchor constraintEqualToConstant:70]
-          ]];
-  }
-
-  if (_chooseFromPhotoLibraryButton) {
-      [NSLayoutConstraint activateConstraints:@[
-          [topLayoutAnchor constraintEqualToAnchor:_chooseFromPhotoLibraryButton.topAnchor],
-          [rightLayoutAnchor constraintEqualToAnchor:_chooseFromPhotoLibraryButton.rightAnchor constant:7],
-          [_chooseFromPhotoLibraryButton.heightAnchor constraintEqualToConstant:50],
-          ]];
-  }
+  
+  [NSLayoutConstraint activateConstraints:@[
+    [_controlsStackView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+    [_controlsStackView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+    [_controlsStackView.bottomAnchor constraintEqualToAnchor:bottomLayoutAnchor constant:-20],
+    
+    [_cameraMaskedOverlayView.heightAnchor constraintEqualToAnchor:self.view.heightAnchor],
+    [_cameraMaskedOverlayView.widthAnchor constraintEqualToAnchor:self.view.widthAnchor],
+    [_cameraMaskedOverlayView.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+    [_cameraMaskedOverlayView.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor],
+    
+    [_cameraOverlayRectView.heightAnchor constraintEqualToAnchor:self.view.heightAnchor],
+    [_cameraOverlayRectView.widthAnchor constraintEqualToAnchor:self.view.widthAnchor],
+    [_cameraOverlayRectView.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+    [_cameraOverlayRectView.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor]
+  ]];
 }
 
 - (void)switchDeviceInput
