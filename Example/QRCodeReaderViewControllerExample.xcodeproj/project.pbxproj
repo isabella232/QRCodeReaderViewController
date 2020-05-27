@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8726AD502477AFDE008D0D1F /* VerticalButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 8726AD4A2477AFDD008D0D1F /* VerticalButton.m */; };
+		8726AD512477AFDE008D0D1F /* CameraMaskedOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8726AD4B2477AFDD008D0D1F /* CameraMaskedOverlayView.m */; };
+		8726AD522477AFDE008D0D1F /* CameraOverlayRectView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8726AD4E2477AFDD008D0D1F /* CameraOverlayRectView.m */; };
 		CE29601E1987F124008FA93B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CE29601D1987F124008FA93B /* main.m */; };
 		CE2960211987F124008FA93B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2960201987F124008FA93B /* AppDelegate.m */; };
 		CE2960241987F124008FA93B /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2960231987F124008FA93B /* ViewController.m */; };
@@ -36,6 +39,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8726AD4A2477AFDD008D0D1F /* VerticalButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VerticalButton.m; sourceTree = "<group>"; };
+		8726AD4B2477AFDD008D0D1F /* CameraMaskedOverlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraMaskedOverlayView.m; sourceTree = "<group>"; };
+		8726AD4C2477AFDD008D0D1F /* CameraMaskedOverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraMaskedOverlayView.h; sourceTree = "<group>"; };
+		8726AD4D2477AFDD008D0D1F /* CameraOverlayRectView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraOverlayRectView.h; sourceTree = "<group>"; };
+		8726AD4E2477AFDD008D0D1F /* CameraOverlayRectView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraOverlayRectView.m; sourceTree = "<group>"; };
+		8726AD4F2477AFDD008D0D1F /* VerticalButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VerticalButton.h; sourceTree = "<group>"; };
 		CE2960181987F124008FA93B /* QRCodeReaderViewControllerExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QRCodeReaderViewControllerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE29601C1987F124008FA93B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CE29601D1987F124008FA93B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -124,6 +133,12 @@
 		CE29603E1987F140008FA93B /* QRCodeReaderViewController */ = {
 			isa = PBXGroup;
 			children = (
+				8726AD4D2477AFDD008D0D1F /* CameraOverlayRectView.h */,
+				8726AD4E2477AFDD008D0D1F /* CameraOverlayRectView.m */,
+				8726AD4C2477AFDD008D0D1F /* CameraMaskedOverlayView.h */,
+				8726AD4B2477AFDD008D0D1F /* CameraMaskedOverlayView.m */,
+				8726AD4F2477AFDD008D0D1F /* VerticalButton.h */,
+				8726AD4A2477AFDD008D0D1F /* VerticalButton.m */,
 				CE29603F1987F140008FA93B /* QRCodeReaderDelegate.h */,
 				CE2960401987F140008FA93B /* QRCodeReaderViewController.h */,
 				CE2960411987F140008FA93B /* QRCodeReaderViewController.m */,
@@ -210,6 +225,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -249,7 +265,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE2960241987F124008FA93B /* ViewController.m in Sources */,
+				8726AD512477AFDE008D0D1F /* CameraMaskedOverlayView.m in Sources */,
 				CEF6D1641BE7B2B0006D575D /* QRToggleTorchButton.m in Sources */,
+				8726AD522477AFDE008D0D1F /* CameraOverlayRectView.m in Sources */,
+				8726AD502477AFDE008D0D1F /* VerticalButton.m in Sources */,
 				CEAF7A691A16B05400991CF8 /* QRCameraSwitchButton.m in Sources */,
 				CE99CEFD1A9BCA1100CB8AD8 /* QRCodeReader.m in Sources */,
 				CE2960211987F124008FA93B /* AppDelegate.m in Sources */,

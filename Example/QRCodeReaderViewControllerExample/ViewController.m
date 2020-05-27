@@ -42,7 +42,9 @@
 
     dispatch_once(&onceToken, ^{
       QRCodeReader *reader = [QRCodeReader readerWithMetadataObjectTypes:@[AVMetadataObjectTypeQRCode]];
-      vc                   = [QRCodeReaderViewController readerWithCancelButtonTitle:@"Cancel" codeReader:reader startScanningAtLoad:YES showSwitchCameraButton:YES showTorchButton:YES];
+      
+      UIColor *bordersColor = [[UIColor alloc] initWithRed:216.0f/255.0f green:216.0f/255.0f blue:216.0f/255.0f alpha:1.0];
+      vc = [[QRCodeReaderViewController alloc] initWithCancelButtonTitle:nil codeReader:reader startScanningAtLoad:true showSwitchCameraButton:false showTorchButton:true chooseFromPhotoLibraryButtonTitle:@"Browse" bordersColor:bordersColor messageText: @"Point your camera on QR code" torchTitle:@"Light" torchImage:nil chooseFromPhotoLibraryButtonImage:nil];
       vc.modalPresentationStyle = UIModalPresentationFormSheet;
     });
     vc.delegate = self;

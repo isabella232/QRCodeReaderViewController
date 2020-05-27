@@ -49,8 +49,9 @@
  */
 - (nonnull id)initWithCancelButtonTitle:(nullable NSString *)cancelTitle;
 
-- (nonnull id)initWithCancelButtonTitle:(NSString *)cancelTitle chooseFromPhotoLibraryButtonTitle:(NSString*)chooseFromPhotoLibraryButtonTitle;
+- (nonnull id)initWithCancelButtonTitle:(nullable NSString *)cancelTitle chooseFromPhotoLibraryButtonTitle:(nullable NSString*)chooseFromPhotoLibraryButtonTitle;
 
+- (nonnull id)initWithCancelButtonTitle:(nullable NSString *)cancelTitle codeReader:(nonnull QRCodeReader *)codeReader startScanningAtLoad:(BOOL)startScanningAtLoad showSwitchCameraButton:(BOOL)showSwitchCameraButton showTorchButton:(BOOL)showTorchButton chooseFromPhotoLibraryButtonTitle:(nullable NSString*)chooseFromPhotoLibraryButtonTitle bordersColor: (nullable UIColor*) bordersColor messageText: (nullable NSString *)message torchTitle: (nullable NSString*)torchTitle torchImage: (nullable UIImage*) torchImage chooseFromPhotoLibraryButtonImage: (nullable UIImage*) chooseFromPhotoLibraryButtonImage;
 /**
  * @abstract Creates a view controller to read QRCodes from a displayed
  * video preview and a cancel button to be go back.
