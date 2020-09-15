@@ -37,6 +37,7 @@
 @property (strong, nonatomic) VerticalButton       *switchCameraButton;
 @property (strong, nonatomic) VerticalButton       *toggleTorchButton;
 @property (strong, nonatomic) VerticalButton       *chooseFromPhotoLibraryButton;
+@property (strong, nonatomic) VerticalButton       *myQRCodeButton;
 @property (strong, nonatomic) QRCodeReaderView     *cameraView;
 @property (strong, nonatomic) UIButton             *cancelButton;
 @property (strong, nonatomic) QRCodeReader         *codeReader;
@@ -44,6 +45,7 @@
 @property (assign, nonatomic) BOOL                 showSwitchCameraButton;
 @property (assign, nonatomic) BOOL                 showTorchButton;
 @property (assign, nonatomic) BOOL                 showChooseFromPhotoLibraryButton;
+@property (assign, nonatomic) BOOL                 showMyQRCodeButton;
 @property (strong, nonatomic) NSString             *chooseFromPhotoLibraryButtonTitle;
 @property (strong, nonatomic) CameraMaskedOverlayView          *cameraMaskedOverlayView;
 @property (strong, nonatomic) CameraOverlayRectView      *cameraOverlayRectView;
@@ -53,6 +55,8 @@
 @property (strong, nonatomic) NSString             *torchTitle;
 @property (strong, nonatomic) UIImage              *chooseFromPhotoLibraryButtonImage;
 @property (strong, nonatomic) UIImage              *torchImage;
+@property (strong, nonatomic) NSString             *myQRCodeTitle;
+@property (strong, nonatomic) UIImage              *myQRCodeImage;
 
 @property (copy, nonatomic) void (^completionBlock) (NSString * __nullable);
 
@@ -80,7 +84,7 @@
 - (id)initWithCancelButtonTitle:(NSString *)cancelTitle chooseFromPhotoLibraryButtonTitle:(NSString*)chooseFromPhotoLibraryButtonTitle
 {
   QRCodeReader *reader = [QRCodeReader readerWithMetadataObjectTypes:@[AVMetadataObjectTypeQRCode]];
-  return [self initWithCancelButtonTitle:cancelTitle codeReader:reader startScanningAtLoad:YES showSwitchCameraButton:NO showTorchButton:NO chooseFromPhotoLibraryButtonTitle:chooseFromPhotoLibraryButtonTitle bordersColor: UIColor.lightGrayColor messageText: nil torchTitle:nil torchImage:nil chooseFromPhotoLibraryButtonImage:nil];
+    return [self initWithCancelButtonTitle:cancelTitle codeReader:reader startScanningAtLoad:YES showSwitchCameraButton:NO showTorchButton:NO showMyQRCodeButton: NO chooseFromPhotoLibraryButtonTitle:chooseFromPhotoLibraryButtonTitle bordersColor: UIColor.lightGrayColor messageText: nil torchTitle:nil torchImage:nil chooseFromPhotoLibraryButtonImage:nil myQRCodeText:nil myQRCodeImage:nil];
 }
 
 - (id)initWithMetadataObjectTypes:(NSArray *)metadataObjectTypes
@@ -107,11 +111,10 @@
 
 - (id)initWithCancelButtonTitle:(nullable NSString *)cancelTitle codeReader:(nonnull QRCodeReader *)codeReader startScanningAtLoad:(BOOL)startScanningAtLoad showSwitchCameraButton:(BOOL)showSwitchCameraButton showTorchButton:(BOOL)showTorchButton
 {
-  return [self initWithCancelButtonTitle:cancelTitle codeReader:codeReader startScanningAtLoad:startScanningAtLoad showSwitchCameraButton:YES showTorchButton:NO chooseFromPhotoLibraryButtonTitle:nil bordersColor:UIColor.lightGrayColor messageText: nil torchTitle:nil torchImage:nil chooseFromPhotoLibraryButtonImage:nil];
+    return [self initWithCancelButtonTitle:cancelTitle codeReader:codeReader startScanningAtLoad:startScanningAtLoad showSwitchCameraButton:YES showTorchButton:NO showMyQRCodeButton: NO chooseFromPhotoLibraryButtonTitle:nil bordersColor:UIColor.lightGrayColor messageText: nil torchTitle:nil torchImage:nil chooseFromPhotoLibraryButtonImage:nil myQRCodeText:nil myQRCodeImage:nil];
 }
 
-- (nonnull id)initWithCancelButtonTitle:(nullable NSString *)cancelTitle codeReader:(nonnull QRCodeReader *)codeReader startScanningAtLoad:(BOOL)startScanningAtLoad showSwitchCameraButton:(BOOL)showSwitchCameraButton showTorchButton:(BOOL)showTorchButton chooseFromPhotoLibraryButtonTitle:(nullable NSString*)chooseFromPhotoLibraryButtonTitle bordersColor: (nullable UIColor*) bordersColor messageText: (nullable NSString *)message torchTitle: (nullable NSString*)torchTitle torchImage: (nullable UIImage*) torchImage chooseFromPhotoLibraryButtonImage: (nullable UIImage*) chooseFromPhotoLibraryButtonImage
-{
+- (nonnull id)initWithCancelButtonTitle:(nullable NSString *)cancelTitle codeReader:(nonnull QRCodeReader *)codeReader startScanningAtLoad:(BOOL)startScanningAtLoad showSwitchCameraButton:(BOOL)showSwitchCameraButton showTorchButton:(BOOL)showTorchButton showMyQRCodeButton:(BOOL)showMyQRCodeButton chooseFromPhotoLibraryButtonTitle:(nullable NSString*)chooseFromPhotoLibraryButtonTitle bordersColor: (nullable UIColor*) bordersColor messageText: (nullable NSString *)message torchTitle: (nullable NSString*)torchTitle torchImage: (nullable UIImage*) torchImage chooseFromPhotoLibraryButtonImage: (nullable UIImage*) chooseFromPhotoLibraryButtonImage myQRCodeText: (NSString*) myQRCodeText myQRCodeImage: (nullable UIImage*) myQRCodeImage {
   if ((self = [super init])) {
     self.view.backgroundColor   = [UIColor blackColor];
     self.bordersColor           = bordersColor;
@@ -119,12 +122,15 @@
     self.startScanningAtLoad    = startScanningAtLoad;
     self.showSwitchCameraButton = showSwitchCameraButton;
     self.showTorchButton        = showTorchButton;
+    self.showMyQRCodeButton     = showMyQRCodeButton;
     self.showChooseFromPhotoLibraryButton = chooseFromPhotoLibraryButtonTitle != nil;
     self.chooseFromPhotoLibraryButtonTitle = chooseFromPhotoLibraryButtonTitle;
     self.message = message;
     self.torchImage = torchImage;
     self.torchTitle = torchTitle;
     self.chooseFromPhotoLibraryButtonImage = chooseFromPhotoLibraryButtonImage;
+    self.myQRCodeTitle = myQRCodeText;
+    self.myQRCodeImage = myQRCodeImage;
 
     [self setupUIComponentsWithCancelButtonTitle:cancelTitle];
     [self setupAutoLayoutConstraints];
@@ -208,8 +214,10 @@
 
 - (void)viewDidLayoutSubviews {
   [super viewDidLayoutSubviews];
-  
-  [self.cameraMaskedOverlayView setNeedsDisplay];
+
+  [_cameraView setNeedsDisplay];
+  [_cameraMaskedOverlayView setNeedsDisplay];
+  [_cameraOverlayRectView setNeedsDisplay];
 }
 
 #pragma mark - Controlling the Reader
@@ -227,6 +235,8 @@
 - (void)orientationChanged:(NSNotification *)notification
 {
   [_cameraView setNeedsDisplay];
+  [_cameraMaskedOverlayView setNeedsDisplay];
+  [_cameraOverlayRectView setNeedsDisplay];
 
   if (_codeReader.previewLayer.connection.isVideoOrientationSupported) {
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
@@ -306,6 +316,15 @@
       
     [self.view addSubview:_titleLabel];
   }
+
+  if (_showMyQRCodeButton && _myQRCodeTitle) {
+    _myQRCodeButton = [[VerticalButton alloc] initWithTitle:_myQRCodeTitle image:_myQRCodeImage];
+
+    [_myQRCodeButton setTranslatesAutoresizingMaskIntoConstraints:false];
+    [_myQRCodeButton addTarget:self action:@selector(myQRCodeSelected:) forControlEvents:UIControlEventTouchUpInside];
+    [_controlsStackView addArrangedSubview:_myQRCodeButton];
+  }
+
   if (_showChooseFromPhotoLibraryButton) {
     _chooseFromPhotoLibraryButton = [[VerticalButton alloc] initWithTitle:_chooseFromPhotoLibraryButtonTitle image:_chooseFromPhotoLibraryButtonImage];
     
@@ -415,6 +434,14 @@
   viewController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
   [self presentViewController:viewController animated:YES completion:nil];
 }
+
+- (void)myQRCodeSelected:(UIButton *)button
+{
+  if (_delegate && [_delegate respondsToSelector:@selector(reader:myQRCodeSelected:)]) {
+    [_delegate reader:self myQRCodeSelected:button];
+  }
+}
+
 
 @end
 

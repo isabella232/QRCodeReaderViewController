@@ -33,7 +33,8 @@
 @implementation QRCodeReaderView
 
 + (CGRect) readerRectFromRect:(CGRect)rect {
-  CGRect innerRect = CGRectInset(rect, 50, 50);
+  CGFloat inset = UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad ? 150 : 50;
+  CGRect innerRect = CGRectInset(rect, inset, inset);
 
   CGFloat minSize = MIN(innerRect.size.width, innerRect.size.height);
   if (innerRect.size.width != minSize) {

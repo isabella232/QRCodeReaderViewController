@@ -56,4 +56,7 @@
  */
 - (void)readerDidCancel:(QRCodeReaderViewController *)reader;
 
+
+- (void)reader:(QRCodeReaderViewController *)reader myQRCodeSelected:(UIButton *)sender;
+
 @end
